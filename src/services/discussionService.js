@@ -1,8 +1,8 @@
-import api from './api';
+import api from "./api";
 
 export const discussionService = {
   getDiscussions: async () => {
-    const response = await api.get('/discussions');
+    const response = await api.get("/discussions");
     return response.data;
   },
 
@@ -22,12 +22,16 @@ export const discussionService = {
   },
 
   sendMessage: async (discussionId, content) => {
-    const response = await api.post(`/discussions/${discussionId}/messages`, { content });
+    const response = await api.post(`/discussions/${discussionId}/messages`, {
+      content,
+    });
     return response.data;
   },
 
   deleteMessage: async (discussionId, messageId) => {
-    const response = await api.delete(`/discussions/${discussionId}/messages/${messageId}`);
+    const response = await api.delete(
+      `/discussions/${discussionId}/messages/${messageId}`
+    );
     return response.data;
   },
 };

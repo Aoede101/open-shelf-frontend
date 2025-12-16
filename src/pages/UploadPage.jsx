@@ -1,19 +1,20 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Upload } from "lucide-react";
-import { bookService } from "../services/bookService";
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Upload, Image, FileText } from 'lucide-react';
+import { bookService } from '../services/bookService';
 
 export default function UploadPage() {
   const [formData, setFormData] = useState({
-    title: "",
-    author: "",
-    category: "Classic Literature",
-    description: "",
-    cover: "",
-    fileUrl: "",
+    title: '',
+    author: '',
+    category: 'Classic Literature',
+    description: '',
   });
+  const [coverFile, setCoverFile] = useState(null);
+  const [bookFile, setBookFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,16 +24,49 @@ export default function UploadPage() {
     });
   };
 
+  const handleCoverChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCoverFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBookFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setBookFile(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     try {
-      await bookService.uploadBook(formData);
-      navigate("/library");
+      const formDataToSend = new FormData();
+      formDataToSend.append('title', formData.title);
+      formDataToSend.append('author', formData.author);
+      formDataToSend.append('category', formData.category);
+      formDataToSend.append('description', formData.description);
+      
+      if (coverFile) {
+        formDataToSend.append('cover', coverFile);
+      }
+      
+      if (bookFile) {
+        formDataToSend.append('bookFile', bookFile);
+      }
+
+      await bookService.uploadBook(formDataToSend);
+      navigate('/library');
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to upload book");
+      setError(err.response?.data?.error || 'Failed to upload book');
     } finally {
       setLoading(false);
     }
@@ -48,14 +82,9 @@ export default function UploadPage() {
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white rounded-lg shadow-md p-6 space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Book Title *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Book Title *</label>
           <input
             type="text"
             name="title"
@@ -67,9 +96,7 @@ export default function UploadPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Author *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Author *</label>
           <input
             type="text"
             name="author"
@@ -81,9 +108,7 @@ export default function UploadPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Category *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
           <select
             name="category"
             value={formData.category}
@@ -101,9 +126,7 @@ export default function UploadPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
           <textarea
             name="description"
             value={formData.description}
@@ -115,36 +138,49 @@ export default function UploadPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Cover Image URL *
-          </label>
-          <input
-            type="url"
-            name="cover"
-            value={formData.cover}
-            onChange={handleChange}
-            placeholder="https://example.com/cover.jpg"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            required
-          />
+          <label className="block text-sm font-medium text-gray-700 mb-2">Cover Image *</label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleCoverChange}
+              className="hidden"
+              id="cover-upload"
+              required
+            />
+            <label htmlFor="cover-upload" className="cursor-pointer">
+              {coverPreview ? (
+                <img src={coverPreview} alt="Cover preview" className="max-h-48 mx-auto mb-4 rounded" />
+              ) : (
+                <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              )}
+              <p className="text-gray-600">Click to upload cover image</p>
+              <p className="text-sm text-gray-500 mt-2">PNG, JPG, GIF (Max 5MB)</p>
+            </label>
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Book File URL *
-          </label>
-          <input
-            type="url"
-            name="fileUrl"
-            value={formData.fileUrl}
-            onChange={handleChange}
-            placeholder="https://example.com/book.pdf"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            required
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            Upload your file to a hosting service and paste the URL here
-          </p>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Book File *</label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-purple-500 transition cursor-pointer">
+            <input
+              type="file"
+              accept=".pdf,.epub"
+              onChange={handleBookFileChange}
+              className="hidden"
+              id="book-upload"
+              required
+            />
+            <label htmlFor="book-upload" className="cursor-pointer">
+              <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              {bookFile ? (
+                <p className="text-green-600 mb-2">✓ {bookFile.name}</p>
+              ) : (
+                <p className="text-gray-600">Click to upload book file</p>
+              )}
+              <p className="text-sm text-gray-500 mt-2">PDF, EPUB (Max 50MB)</p>
+            </label>
+          </div>
         </div>
 
         <button
@@ -153,7 +189,7 @@ export default function UploadPage() {
           className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50 flex items-center justify-center space-x-2"
         >
           <Upload className="h-5 w-5" />
-          <span>{loading ? "Uploading..." : "Upload Book"}</span>
+          <span>{loading ? 'Uploading...' : 'Upload Book'}</span>
         </button>
       </form>
     </div>

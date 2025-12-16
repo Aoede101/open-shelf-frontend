@@ -1,4 +1,5 @@
-import { BookOpen } from "lucide-react";
+import { BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
@@ -18,42 +19,33 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li className="hover:text-white cursor-pointer">About Us</li>
-              <li className="hover:text-white cursor-pointer">How It Works</li>
-              <li className="hover:text-white cursor-pointer">Guidelines</li>
-              <li className="hover:text-white cursor-pointer">Contact</li>
+              <li><Link to="/about" className="hover:text-white">About Us</Link></li>
+              <li><Link to="/how-it-works" className="hover:text-white">How It Works</Link></li>
+              <li><Link to="/guidelines" className="hover:text-white">Guidelines</Link></li>
+              <li><Link to="/contact" className="hover:text-white">Contact</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-semibold mb-4">Categories</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li className="hover:text-white cursor-pointer">
-                Classic Literature
-              </li>
-              <li className="hover:text-white cursor-pointer">
-                Science Fiction
-              </li>
-              <li className="hover:text-white cursor-pointer">Non-Fiction</li>
-              <li className="hover:text-white cursor-pointer">Biography</li>
+              <li><Link to="/library?category=Classic Literature" className="hover:text-white">Classic Literature</Link></li>
+              <li><Link to="/library?category=Science Fiction" className="hover:text-white">Science Fiction</Link></li>
+              <li><Link to="/library?category=Non-Fiction" className="hover:text-white">Non-Fiction</Link></li>
+              <li><Link to="/library?category=Biography" className="hover:text-white">Biography</Link></li>
             </ul>
           </div>
           <div>
             <h3 className="font-semibold mb-4">Community</h3>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li className="hover:text-white cursor-pointer">
-                Discussion Rooms
-              </li>
-              <li className="hover:text-white cursor-pointer">Book Clubs</li>
+              <li><Link to="/community" className="hover:text-white">Discussion Rooms</Link></li>
+              <li><Link to="/book-clubs" className="hover:text-white">Book Clubs</Link></li>
               <li className="hover:text-white cursor-pointer">Author Talks</li>
               <li className="hover:text-white cursor-pointer">Events</li>
             </ul>
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>
-            © 2024 OpenShelf. All rights reserved. Built with ❤️ for book
-            lovers.
-          </p>
+          <p>© 2024 OpenShelf. All rights reserved. Built with ❤️ for book lovers.</p>
         </div>
       </div>
     </footer>

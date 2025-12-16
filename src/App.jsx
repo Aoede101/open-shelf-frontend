@@ -17,11 +17,11 @@ import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 
 // Footer Pages
-/* import AboutPage from './pages/AboutPage';
+import AboutPage from './pages/AboutPage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import GuidelinesPage from './pages/GuidelinesPage';
 import ContactPage from './pages/ContactPage';
-import BookClubsPage from './pages/BookClubsPage'; */
+import BookClubsPage from './pages/BookClubsPage';
 
 // Protected Route Component
 function ProtectedRoute({ children }) {
@@ -77,12 +77,12 @@ function AppContent() {
           />
           
           {/* Footer Pages */}
-          {/* <Route path="/about" element={<AboutPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/guidelines" element={<GuidelinesPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/book-clubs" element={<BookClubsPage />} />
-           */}
+          
           {/* Catch all - 404 */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>

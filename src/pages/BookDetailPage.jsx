@@ -1,17 +1,20 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Download, MessageSquare, Star } from "lucide-react";
+import { Download, MessageSquare, Star, Heart } from "lucide-react";
 import { bookService } from "../services/bookService";
 import { reviewService } from "../services/reviewService";
+import { userService } from "../services/userService";
 import { useAuth } from "../context/AuthContext";
 
 export default function BookDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [book, setBook] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favoriting, setFavoriting] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -20,7 +23,10 @@ export default function BookDetailPage() {
   useEffect(() => {
     fetchBookDetails();
     fetchReviews();
-  }, [id]);
+    if (isAuthenticated) {
+      checkFavoriteStatus();
+    }
+  }, [id, isAuthenticated]);
 
   const fetchBookDetails = async () => {
     try {
@@ -42,11 +48,56 @@ export default function BookDetailPage() {
     }
   };
 
+  const checkFavoriteStatus = async () => {
+    try {
+      const { isFavorite: status } = await userService.checkFavorite(id);
+      setIsFavorite(status);
+    } catch (error) {
+      console.error("Failed to check favorite status:", error);
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    setFavoriting(true);
+    try {
+      if (isFavorite) {
+        await userService.removeFromFavorites(id);
+        setIsFavorite(false);
+        setBook((prev) => ({
+          ...prev,
+          favoriteCount: Math.max(0, (prev.favoriteCount || 0) - 1),
+        }));
+      } else {
+        await userService.addToFavorites(id);
+        setIsFavorite(true);
+        setBook((prev) => ({
+          ...prev,
+          favoriteCount: (prev.favoriteCount || 0) + 1,
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+      alert(error.response?.data?.error || "Failed to update favorites");
+    } finally {
+      setFavoriting(false);
+    }
+  };
+
   const handleDownload = async () => {
     try {
       await bookService.downloadBook(id);
       if (book.fileUrl) {
-        window.open(book.fileUrl, "_blank");
+        window.open(
+          book.fileUrl.startsWith("http")
+            ? book.fileUrl
+            : `http://localhost:5000${book.fileUrl}`,
+          "_blank"
+        );
       } else {
         alert("Download link not available");
       }
@@ -98,7 +149,11 @@ export default function BookDetailPage() {
         <div className="grid md:grid-cols-3 gap-6">
           <div>
             <img
-              src={book.cover}
+              src={
+                book.cover?.startsWith("http")
+                  ? book.cover
+                  : `http://localhost:5000${book.cover}`
+              }
               alt={book.title}
               className="w-full rounded-lg shadow-md"
             />
@@ -128,6 +183,12 @@ export default function BookDetailPage() {
                 <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
                   {book.category}
                 </span>
+                <div className="flex items-center space-x-1 text-gray-600">
+                  <Heart className="h-4 w-4" />
+                  <span className="text-sm">
+                    {book.favoriteCount || 0} favorites
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -164,7 +225,34 @@ export default function BookDetailPage() {
                 <span>Download</span>
               </button>
               <button
-                onClick={() => navigate("/community")}
+                onClick={handleToggleFavorite}
+                disabled={favoriting}
+                className={`px-6 py-3 rounded-lg transition flex items-center justify-center space-x-2 ${
+                  isFavorite
+                    ? "bg-red-100 text-red-600 hover:bg-red-200"
+                    : "border-2 border-purple-600 text-purple-600 hover:bg-purple-50"
+                }`}
+              >
+                <Heart
+                  className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`}
+                />
+                <span>{isFavorite ? "Favorited" : "Favorite"}</span>
+              </button>
+              <button
+                onClick={async () => {
+                  if (!isAuthenticated) {
+                    navigate("/login");
+                    return;
+                  }
+                  try {
+                    const discussion = await discussionService.joinDiscussion(
+                      book._id
+                    );
+                    navigate(`/discussions/${discussion._id}`);
+                  } catch (error) {
+                    console.error("Failed to join discussion:", error);
+                  }
+                }}
                 className="flex-1 px-6 py-3 border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition flex items-center justify-center space-x-2"
               >
                 <MessageSquare className="h-5 w-5" />
@@ -175,6 +263,7 @@ export default function BookDetailPage() {
         </div>
       </div>
 
+      {/* Reviews Section */}
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">Reviews</h2>

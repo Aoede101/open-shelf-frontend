@@ -1,8 +1,8 @@
-import api from "./api";
+import api from './api';
 
 export const bookService = {
   getBooks: async (params = {}) => {
-    const response = await api.get("/books", { params });
+    const response = await api.get('/books', { params });
     return response.data;
   },
 
@@ -11,8 +11,13 @@ export const bookService = {
     return response.data;
   },
 
-  uploadBook: async (bookData) => {
-    const response = await api.post("/books", bookData);
+  uploadBook: async (formData) => {
+    // FormData for file uploads
+    const response = await api.post('/books', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return response.data;
   },
 

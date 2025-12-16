@@ -1,33 +1,102 @@
 import { useState } from "react";
-import { Bot } from "lucide-react";
+import { Bot, Send } from "lucide-react";
+
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 export default function AIAssistantPage() {
   const [messages, setMessages] = useState([
     {
       role: "assistant",
       content:
-        "Hello! I'm your AI book assistant. Describe what kind of book you're looking for, and I'll recommend something perfect for you!",
+        "Hello! I'm your AI book assistant. Tell me what kind of books you enjoy, and I'll recommend something perfect for you!",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || loading) return;
 
-    const userMessage = { role: "user", content: input };
-    setMessages([...messages, userMessage]);
+    if (!GEMINI_API_KEY) {
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: input },
+        {
+          role: "assistant",
+          content:
+            "Gemini API key is missing. Please add VITE_GEMINI_API_KEY to your .env file.",
+        },
+      ]);
+      setInput("");
+      return;
+    }
+
+    const userText = input;
+    setMessages((prev) => [...prev, { role: "user", content: userText }]);
     setInput("");
     setLoading(true);
 
-    setTimeout(() => {
-      const assistantMessage = {
-        role: "assistant",
-        content: `Based on your interest in "${input}", I recommend checking out some classics from our library! Try exploring our Science Fiction or Classic Literature sections. You can also use the search feature to find specific titles or authors.`,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `You are a helpful AI book recommendation assistant.
+
+User request:
+"${userText}"
+
+Recommend 2–3 books.
+For each book include:
+- Title and author
+- Short description (2–3 sentences)
+- Why it matches the user's interests.`,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800,
+            },
+          }),
+        }
+      );
+
+      const data = await response.json();
+      console.log("Gemini raw response:", data);
+
+      const text = data?.candidates?.[0]?.content?.parts
+        ?.map((p) => p.text)
+        .join("");
+
+      if (!text) {
+        throw new Error("No text returned from Gemini");
+      }
+
+      setMessages((prev) => [...prev, { role: "assistant", content: text }]);
+    } catch (err) {
+      console.error("Gemini API error:", err);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            "Sorry, I couldn't generate recommendations right now. Please try again.",
+        },
+      ]);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -40,7 +109,7 @@ export default function AIAssistantPage() {
           <h1 className="text-4xl font-bold text-gray-900">
             AI Book Assistant
           </h1>
-          <p className="text-gray-600">Get personalized book recommendations</p>
+          <p className="text-gray-600">Powered by Google Gemini</p>
         </div>
       </div>
 
@@ -60,24 +129,23 @@ export default function AIAssistantPage() {
                     : "bg-gray-100 text-gray-900"
                 }`}
               >
-                {message.content}
+                <p className="whitespace-pre-wrap">{message.content}</p>
               </div>
             </div>
           ))}
+
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 rounded-lg p-4">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.1s" }}
-                  ></div>
-                  <div
-                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                    style={{ animationDelay: "0.2s" }}
-                  ></div>
-                </div>
+              <div className="bg-gray-100 rounded-lg p-4 flex space-x-2">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.1s" }}
+                />
+                <div
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                />
               </div>
             </div>
           )}
@@ -86,20 +154,20 @@ export default function AIAssistantPage() {
         <div className="border-t p-4">
           <div className="flex space-x-2">
             <input
-              type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSend()}
-              placeholder="Describe the book you're looking for..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              placeholder="What kind of books do you enjoy?"
+              className="flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500"
               disabled={loading}
             />
             <button
               onClick={handleSend}
               disabled={loading || !input.trim()}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition disabled:opacity-50"
+              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2"
             >
-              Send
+              <Send className="h-4 w-4" />
+              {loading ? "Sending..." : "Send"}
             </button>
           </div>
         </div>
