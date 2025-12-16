@@ -1,6 +1,17 @@
-import { Star, ThumbsUp, MessageCircle } from 'lucide-react';
+import { Star, ThumbsUp, MessageCircle } from "lucide-react";
 
 export default function BookCard({ book, onClick }) {
+  // FIX: Proper cover URL handling
+  const getCoverUrl = (cover) => {
+    if (!cover) return "https://via.placeholder.com/400x600?text=No+Cover";
+    if (cover.startsWith("http")) return cover;
+    // Remove /api from URL and add the cover path
+    const baseUrl =
+      import.meta.env.VITE_API_URL?.replace("/api", "") ||
+      "http://localhost:5000";
+    return `${baseUrl}${cover}`;
+  };
+
   return (
     <div
       onClick={onClick}
@@ -8,13 +19,19 @@ export default function BookCard({ book, onClick }) {
     >
       <div className="relative overflow-hidden">
         <img
-          src={book.cover}
+          src={getCoverUrl(book.cover)}
           alt={book.title}
           className="w-full h-64 object-cover group-hover:scale-105 transition duration-300"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://via.placeholder.com/400x600?text=No+Cover";
+          }}
         />
         <div className="absolute top-2 right-2 bg-white rounded-full px-3 py-1 flex items-center space-x-1">
           <Star className="h-4 w-4 text-yellow-500 fill-current" />
-          <span className="text-sm font-semibold">{book.rating?.toFixed(1) || '0.0'}</span>
+          <span className="text-sm font-semibold">
+            {book.rating?.toFixed(1) || "0.0"}
+          </span>
         </div>
       </div>
       <div className="p-4">

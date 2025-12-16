@@ -4,12 +4,13 @@ import { Download, MessageSquare, Star, Heart } from "lucide-react";
 import { bookService } from "../services/bookService";
 import { reviewService } from "../services/reviewService";
 import { userService } from "../services/userService";
+import { discussionService } from "../services/discussionService"; // FIX: Import at top
 import { useAuth } from "../context/AuthContext";
 
 export default function BookDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [book, setBook] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,18 +92,28 @@ export default function BookDetailPage() {
   const handleDownload = async () => {
     try {
       await bookService.downloadBook(id);
-      if (book.fileUrl) {
-        window.open(
-          book.fileUrl.startsWith("http")
-            ? book.fileUrl
-            : `http://localhost:5000${book.fileUrl}`,
-          "_blank"
-        );
-      } else {
-        alert("Download link not available");
-      }
+      const fileUrl = book.fileUrl.startsWith("http")
+        ? book.fileUrl
+        : `${import.meta.env.VITE_API_URL.replace("/api", "")}${book.fileUrl}`;
+      window.open(fileUrl, "_blank");
     } catch (error) {
       console.error("Download failed:", error);
+    }
+  };
+
+  // FIX: Proper async handler for Join Discussion
+  const handleJoinDiscussion = async () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const discussion = await discussionService.joinDiscussion(book._id);
+      navigate(`/discussions/${discussion._id}`);
+    } catch (error) {
+      console.error("Failed to join discussion:", error);
+      alert("Failed to join discussion. Please try again.");
     }
   };
 
@@ -143,19 +154,27 @@ export default function BookDetailPage() {
     );
   }
 
+  // FIX: Proper cover URL handling
+  const getCoverUrl = (cover) => {
+    if (!cover) return "https://via.placeholder.com/400x600?text=No+Cover";
+    if (cover.startsWith("http")) return cover;
+    return `${import.meta.env.VITE_API_URL.replace("/api", "")}${cover}`;
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="grid md:grid-cols-3 gap-6">
           <div>
             <img
-              src={
-                book.cover?.startsWith("http")
-                  ? book.cover
-                  : `http://localhost:5000${book.cover}`
-              }
+              src={getCoverUrl(book.cover)}
               alt={book.title}
               className="w-full rounded-lg shadow-md"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src =
+                  "https://via.placeholder.com/400x600?text=No+Cover";
+              }}
             />
           </div>
 
@@ -239,24 +258,11 @@ export default function BookDetailPage() {
                 <span>{isFavorite ? "Favorited" : "Favorite"}</span>
               </button>
               <button
-                onClick={async () => {
-                  if (!isAuthenticated) {
-                    navigate("/login");
-                    return;
-                  }
-                  try {
-                    const discussion = await discussionService.joinDiscussion(
-                      book._id
-                    );
-                    navigate(`/discussions/${discussion._id}`);
-                  } catch (error) {
-                    console.error("Failed to join discussion:", error);
-                  }
-                }}
+                onClick={handleJoinDiscussion}
                 className="flex-1 px-6 py-3 border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition flex items-center justify-center space-x-2"
               >
                 <MessageSquare className="h-5 w-5" />
-                <span>Join Discussion</span>
+                <span>Discuss</span>
               </button>
             </div>
           </div>
