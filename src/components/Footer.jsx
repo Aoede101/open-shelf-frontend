@@ -45,7 +45,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>© 2024 OpenShelf. All rights reserved. Built with ❤️ for book lovers.</p>
+          <p>© 2025 OpenShelf. All rights reserved. Built with ❤️ for book lovers.</p>
         </div>
       </div>
     </footer>
