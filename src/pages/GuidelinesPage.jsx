@@ -7,15 +7,15 @@ export default function GuidelinesPage() {
         <div className="flex justify-center">
           <Shield className="h-20 w-20 text-purple-600" />
         </div>
-        <h1 className="text-5xl font-bold text-gray-900">Community Guidelines</h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <h1 className="text-5xl font-bold text-gray-900 dark:text-gray-50">Community Guidelines</h1>
+        <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
           Help us maintain a safe, respectful, and welcoming environment for all members.
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">Our Principles</h2>
-        <div className="space-y-4 text-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mb-6">Our Principles</h2>
+        <div className="space-y-4 text-gray-700 dark:text-gray-300">
           <p className="leading-relaxed">
             OpenShelf is built on the foundation of respect, integrity, and the shared love of literature. Every member of our community plays a vital role in maintaining a positive environment.
           </p>
@@ -74,9 +74,9 @@ export default function GuidelinesPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6">Enforcement</h2>
-        <div className="space-y-4 text-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-50 mb-6">Enforcement</h2>
+        <div className="space-y-4 text-gray-700 dark:text-gray-300">
           <p className="leading-relaxed">
             Violations of these guidelines may result in:
           </p>
@@ -113,16 +113,16 @@ function GuidelineSection({ icon: Icon, title, color, items }) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-8">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
       <div className="flex items-center space-x-3 mb-6">
         <Icon className={`h-8 w-8 ${colorClasses[color].split(' ')[0]}`} />
-        <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-50">{title}</h2>
       </div>
       <ul className="space-y-3">
         {items.map((item, index) => (
           <li key={index} className="flex items-start space-x-3">
             <Icon className={`h-5 w-5 ${colorClasses[color].split(' ')[0]} flex-shrink-0 mt-0.5`} />
-            <span className="text-gray-700">{item}</span>
+            <span className="text-gray-700 dark:text-gray-50">{item}</span>
           </li>
         ))}
       </ul>

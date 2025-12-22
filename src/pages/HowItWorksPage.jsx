@@ -1,12 +1,22 @@
-import { UserPlus, Search, Upload, MessageSquare, Download, Star } from 'lucide-react';
+import {
+  UserPlus,
+  Search,
+  Upload,
+  MessageSquare,
+  Download,
+  Star,
+} from "lucide-react";
 
 export default function HowItWorksPage() {
   return (
     <div className="space-y-12">
       <div className="text-center space-y-4">
-        <h1 className="text-5xl font-bold text-gray-900">How It Works</h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          Getting started with OpenShelf is easy. Follow these simple steps to join our community.
+        <h1 className="text-5xl font-bold text-gray-900 dark:text-gray-200">
+          How It Works
+        </h1>
+        <p className="text-xl text-gray-600 max-w-3xl mx-auto dark:text-gray-400">
+          Getting started with OpenShelf is easy. Follow these simple steps to
+          join our community.
         </p>
       </div>
 
@@ -55,8 +65,10 @@ export default function HowItWorksPage() {
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Features</h2>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center dark:text-gray-50">
+          Features
+        </h2>
         <div className="grid md:grid-cols-3 gap-6">
           <FeatureBox
             title="Smart Search"
@@ -90,22 +102,28 @@ export default function HowItWorksPage() {
 
 function StepCard({ number, icon: Icon, title, description, color }) {
   const colorClasses = {
-    purple: 'bg-purple-600',
-    blue: 'bg-blue-600',
-    indigo: 'bg-indigo-600',
+    purple: "bg-purple-600",
+    blue: "bg-blue-600",
+    indigo: "bg-indigo-600",
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 flex items-start space-x-6 hover:shadow-lg transition">
-      <div className={`${colorClasses[color]} text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold flex-shrink-0`}>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 flex items-start space-x-6 hover:shadow-lg transition">
+      <div
+        className={`${colorClasses[color]} text-white rounded-full w-16 h-16 flex items-center justify-center text-2xl font-bold flex-shrink-0`}
+      >
         {number}
       </div>
-      <div className="flex-1">
+      <div className=" flex-1">
         <div className="flex items-center space-x-3 mb-3">
           <Icon className={`h-6 w-6 text-${color}-600`} />
-          <h3 className="text-2xl font-bold text-gray-900">{title}</h3>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-200">
+            {title}
+          </h3>
         </div>
-        <p className="text-gray-700 leading-relaxed">{description}</p>
+        <p className="text-gray-700 leading-relaxed dark:text-gray-300">
+          {description}
+        </p>
       </div>
     </div>
   );
@@ -114,8 +132,10 @@ function StepCard({ number, icon: Icon, title, description, color }) {
 function FeatureBox({ title, description }) {
   return (
     <div className="p-4">
-      <h4 className="text-lg font-semibold text-gray-900 mb-2">{title}</h4>
-      <p className="text-gray-600">{description}</p>
+      <h4 className="text-lg font-semibold text-gray-900 mb-2 dark:text-gray-200">
+        {title}
+      </h4>
+      <p className="text-gray-600 dark:text-gray-300">{description}</p>
     </div>
   );
 }
